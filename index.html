@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Terminal</title>
+    <style>
+        /* (Add your terminal styles here) */
+    </style>
+</head>
+<body>
+    <h1>WebSocket Terminal</h1>
+    <div id="messages"></div>
+    <div id="inputArea">
+        <input type="text" id="inputField" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const socket = new WebSocket('wss://your-vercel-function-url/api/websocket'); // Replace with your serverless function endpoint
+
+        socket.onopen = function() {
+            console.log('WebSocket connection established.');
+            addMessage('Connected to WebSocket.');
+        };
+
+        socket.onmessage = function(event) {
+            addMessage(`Server: ${event.data}`);
+        };
+
+        socket.onerror = function(error) {
+            console.error('WebSocket Error: ', error);
+            addMessage(`Error: ${error.message}`);
+        };
+
+        socket.onclose = function(event) {
+            if (event.wasClean) {
+                console.log('Closed cleanly.');
+            } else {
+                console.error('Connection lost');
+                addMessage('Connection lost.');
+            }
+        };
+
+        function sendMessage() {
+            const inputField = document.getElementById('inputField');
+            const message = inputField.value;
+            if (message) {
+                socket.send(message);
+                addMessage(`You: ${message}`);
+                inputField.value = ''; // Clear the input
+            }
+        }
+
+        function addMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const newMessage = document.createElement('div');
+            newMessage.textContent = message;
+            messagesDiv.appendChild(newMessage);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
+        }
+    </script>
+</body>
+</html>
